@@ -109,7 +109,7 @@ async function operator(proxies = [], targetPlatform, env) {
         })
         const status = parseInt(res.status || res.statusCode || 200)
         let latency = ''
-       const latency = (Date.now() - startedAt).toString().padStart(4, '0');
+       latency = (Date.now() - startedAt).toString().padStart(4, '0');
         $.info(`[${proxy.name}] status: ${status}, latency: ${latency}`)
         // 判断响应
         if (status == validStatus) {
