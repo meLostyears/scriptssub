@@ -1,25 +1,3 @@
-/**
- * 节点测活(适配 Surge/Loon 版)
- *
- * 说明: https://t.me/zhetengsha/1210
- *
- * 欢迎加入 Telegram 群组 https://t.me/zhetengsha
- *
- * 参数
- * - [timeout] 请求超时(单位: 毫秒) 默认 5000
- * - [retries] 重试次数 默认 1
- * - [retry_delay] 重试延时(单位: 毫秒) 默认 1000
- * - [concurrency] 并发数 默认 10
- * - [url] 检测的 URL. 需要 encodeURIComponent. 默认 http://www.apple.com/library/test/success.html
- * - [status] 合法的状态码. 默认 200
- * - [method] 请求方法. 默认 head, 如果测试 URL 不支持, 可设为 get
- * - [show_latency] 显示延迟. 默认不显示
- * - [keep_incompatible] 保留当前客户端不兼容的协议. 默认不保留.
- * - [cache] 使用缓存, 默认不使用缓存
- * - [telegram_bot_token] Telegram Bot Token
- * - [telegram_chat_id] Telegram Chat ID
- */
-
 async function operator(proxies = [], targetPlatform, env) {
   const $ = $substore
   const { isLoon, isSurge } = $.env
@@ -45,15 +23,6 @@ async function operator(proxies = [], targetPlatform, env) {
     { concurrency }
   )
 
-  // const batches = []
-  // for (let i = 0; i < proxies.length; i += concurrency) {
-  //   const batch = proxies.slice(i, i + concurrency)
-  //   batches.push(batch)
-  // }
-  // for (const batch of batches) {
-  //   await Promise.all(batch.map(check))
-  // }
-
   if (telegram_chat_id && telegram_bot_token && failedProxies.length > 0) {
     const text = `\`${subName}\` 节点测试:\n${failedProxies
       .map(proxy => `❌ [${proxy.type}] \`${proxy.name}\``)
@@ -71,8 +40,6 @@ async function operator(proxies = [], targetPlatform, env) {
   return validProxies
 
   async function check(proxy) {
-    // $.info(`[${proxy.name}] 检测`)
-    // $.info(`检测 ${JSON.stringify(proxy, null, 2)}`)
     const id = cacheEnabled
       ? `availability:${url}:${method}:${validStatus}:${JSON.stringify(
           Object.fromEntries(
@@ -80,7 +47,6 @@ async function operator(proxies = [], targetPlatform, env) {
           )
         )}`
       : undefined
-    // $.info(`检测 ${id}`)
     try {
       const node = ProxyUtils.produce([proxy], target)
       if (node) {
@@ -95,7 +61,6 @@ async function operator(proxies = [], targetPlatform, env) {
           }
           return
         }
-        // 请求
         const startedAt = Date.now()
         const res = await http({
           method,
@@ -108,9 +73,8 @@ async function operator(proxies = [], targetPlatform, env) {
           node,
         })
         const status = parseInt(res.status || res.statusCode || 200)
-        let latency = `${Date.now() - startedAt}`.padStart(4, '0');
+        let latency = `${Date.now() - startedAt}`.padStart(4, '0')
         $.info(`[${proxy.name}] status: ${status}, latency: ${latency}`)
-        // 判断响应
         if (status == validStatus) {
           validProxies.push({
             ...proxy,
@@ -142,7 +106,7 @@ async function operator(proxies = [], targetPlatform, env) {
       failedProxies.push(proxy)
     }
   }
-  // 请求
+
   async function http(opt = {}) {
     const METHOD = opt.method || 'get'
     const TIMEOUT = parseFloat(opt.timeout || $arguments.timeout || 5000)
@@ -154,11 +118,9 @@ async function operator(proxies = [], targetPlatform, env) {
       try {
         return await $.http[METHOD]({ ...opt, timeout: TIMEOUT })
       } catch (e) {
-        // $.error(e)
         if (count < RETRIES) {
           count++
           const delay = RETRY_DELAY * count
-          // $.info(`第 ${count} 次请求失败: ${e.message || e}, 等待 ${delay / 1000}s 后重试`)
           await $.wait(delay)
           return await fn()
         } else {
@@ -168,6 +130,7 @@ async function operator(proxies = [], targetPlatform, env) {
     }
     return await fn()
   }
+
   function executeAsyncTasks(tasks, { wrap, result, concurrency = 1 } = {}) {
     return new Promise(async (resolve, reject) => {
       try {
