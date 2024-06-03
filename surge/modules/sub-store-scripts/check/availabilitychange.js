@@ -109,17 +109,17 @@ async function operator(proxies = [], targetPlatform, env) {
         })
         const status = parseInt(res.status || res.statusCode || 200)
         //let latency = ''
-       latency = (Date.now() - startedAt).toString().padStart(4, '0');
-        $.info(`[${proxy.name}] status: ${status}, latency: ${latency}`)
+       const latencyValue = (Date.now() - startedAt).toString().padStart(4, '0');
+        $.info(`[${proxy.name}] status: ${status}, latency: ${latencyValue}`);
         // 判断响应
         if (status == validStatus) {
           validProxies.push({
             ...proxy,
-            name: `${proxy.name} ${$arguments.show_latency ? `[${latency}]` : ''}`,
+            name: `${proxy.name} ${$arguments.show_latency ? `[${latencyValue}]` : ''}`,
           })
           if (cacheEnabled) {
             $.info(`[${proxy.name}] 设置成功缓存`)
-            cache.set(id, { latency })
+            cache.set(id, { latency: latencyValue });
           }
         } else {
           if (cacheEnabled) {
