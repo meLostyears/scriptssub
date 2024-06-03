@@ -90,7 +90,7 @@ async function operator(proxies = [], targetPlatform, env) {
           if (cached.latency) {
             validProxies.push({
               ...proxy,
-              name: `${proxy.name} ${$arguments.show_latency ? `[${cached.latency.toString().padStart(4, '0')}]` : ''}`,
+              name: `${$arguments.show_latency ? `[${cached.latency}] ` : ''}${proxy.name}`,
             })
           }
           return
@@ -108,18 +108,17 @@ async function operator(proxies = [], targetPlatform, env) {
           node,
         })
         const status = parseInt(res.status || res.statusCode || 200)
-        //let latency = ''
-       const latencyValue = (Date.now() - startedAt).toString().padStart(4, '0');
-        $.info(`[${proxy.name}] status: ${status}, latency: ${latencyValue}`);
+        let latency = `${Date.now() - startedAt}`.padStart(4, '0');
+        $.info(`[${proxy.name}] status: ${status}, latency: ${latency}`)
         // 判断响应
         if (status == validStatus) {
           validProxies.push({
             ...proxy,
-            name: `${proxy.name} ${$arguments.show_latency ? `[${latencyValue}]` : ''}`,
+            name: `${$arguments.show_latency ? `[${latency}] ` : ''}${proxy.name}`,
           })
           if (cacheEnabled) {
             $.info(`[${proxy.name}] 设置成功缓存`)
-            cache.set(id, { latency: latencyValue });
+            cache.set(id, { latency })
           }
         } else {
           if (cacheEnabled) {
