@@ -175,7 +175,10 @@ async function operator(proxies = [], targetPlatform, context) {
       const status = parseInt(res.status || res.statusCode || 200)
       let latency = ''
       latency = `${Date.now() - startedAt}`
-      const speed = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8).padStart(3, '0') + ' M'
+      let speed = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8) + ' M'
+      speed = speed.replace(/(\d+) M/, function (match, p1) {
+        return (p1.length < 3 ? '0' + p1 : p1) + ' M';
+      }); // 补零操作，保证两位数
       $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`)
       // 判断响应
       if (speed) {
@@ -194,78 +197,4 @@ async function operator(proxies = [], targetPlatform, context) {
         }
       }
     } catch (e) {
-      $.error(`[${proxy.name}] ${e.message ?? e}`)
-      if (cacheEnabled) {
-        $.info(`[${proxy.name}] 设置失败缓存`)
-        cache.set(id, {})
-      }
-    }
-  }
-  // 请求
-  async function http(opt = {}) {
-    const METHOD = opt.method || $arguments.method || 'get'
-    const TIMEOUT = parseFloat(opt.timeout || $arguments.timeout || 10000)
-    const RETRIES = parseFloat(opt.retries ?? $arguments.retries ?? 0)
-    const RETRY_DELAY = parseFloat(opt.retry_delay ?? $arguments.retry_delay ?? 1000)
-    let count = 0
-    const fn = async () => {
-      try {
-        return await $.http[METHOD]({ ...opt, timeout: TIMEOUT })
-      } catch (e) {
-        // $.error(e)
-        if (count < RETRIES) {
-          count++
-          const delay = RETRY_DELAY * count
-          // $.info(`第 ${count} 次请求失败: ${e.message ?? e}, 等待 ${delay / 1000}s 后重试`)
-          await $.wait(delay)
-          return await fn()
-        } else {
-          throw e
-        }
-      }
-    }
-    return await fn()
-  }
-  function executeAsyncTasks(tasks, { wrap, result, concurrency = 1 } = {}) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        let running = 0
-        const results = []
-
-        let index = 0
-
-        function executeNextTask() {
-          while (index < tasks.length && running < concurrency) {
-            const taskIndex = index++
-            const currentTask = tasks[taskIndex]
-            running++
-
-            currentTask()
-              .then(data => {
-                if (result) {
-                  results[taskIndex] = wrap ? { data } : data
-                }
-              })
-              .catch(error => {
-                if (result) {
-                  results[taskIndex] = wrap ? { error } : error
-                }
-              })
-              .finally(() => {
-                running--
-                executeNextTask()
-              })
-          }
-
-          if (running === 0) {
-            return resolve(result ? results : undefined)
-          }
-        }
-
-        await executeNextTask()
-      } catch (e) {
-        reject(e)
-      }
-    })
-  }
-}
+      $.error(`[${proxy.name}] ${
