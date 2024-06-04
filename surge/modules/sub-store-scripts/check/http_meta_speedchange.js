@@ -177,7 +177,7 @@ async function operator(proxies = [], targetPlatform, context) {
       latency = `${Date.now() - startedAt}`
       let speed = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8) + ' M'
       speed = speed.replace(/(\d+) M/, function (match, p1) {
-        return (p1.length < 2 ? '0' + p1 : p1) + ' M';
+        return (p1.length < 3 ? '0' + p1 : p1) + ' M';
       }); // 补零操作，保证两位数
       $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`)
       // 判断响应
