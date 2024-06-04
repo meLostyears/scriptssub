@@ -175,7 +175,7 @@ async function operator(proxies = [], targetPlatform, context) {
       const status = parseInt(res.status || res.statusCode || 200)
       let latency = ''
       latency = `${Date.now() - startedAt}`
-      let speed = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8)
+      let speed = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8) + ' M'
       speed = speed.replace(/(\d+) M/, function (match, p1) {
         return (p1.length < 2 ? '0' + p1 : p1) + ' M';
       }); // 补零操作，保证两位数
