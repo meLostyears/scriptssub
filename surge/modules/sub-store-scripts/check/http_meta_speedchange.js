@@ -1,3 +1,29 @@
+/**
+ *
+ * 节点测速娱乐版(适配 Sub-Store Node.js 版)
+ *
+ * 说明: https://t.me/zhetengsha/1258
+ *
+ * 欢迎加入 Telegram 群组 https://t.me/zhetengsha
+ *
+ * HTTP META(https://github.com/xream/http-meta) 参数
+ * - [http_meta_protocol] 协议 默认: http
+ * - [http_meta_host] 服务地址 默认: 127.0.0.1
+ * - [http_meta_port] 端口号 默认: 9876
+ * - [http_meta_authorization] Authorization 默认无
+ * - [http_meta_start_delay] 初始启动延时(单位: 毫秒) 默认: 3000
+ * - [http_meta_proxy_timeout] 每个节点耗时(单位: 毫秒). 此参数是为了防止脚本异常退出未关闭核心. 设置过小将导致核心过早退出. 目前逻辑: 启动初始的延时 + 每个节点耗时. 默认: 10000
+ *
+ * 其它参数
+ * - [timeout] 请求超时(单位: 毫秒) 默认 10000
+ * - [retries] 重试次数 默认 0
+ * - [retry_delay] 重试延时(单位: 毫秒) 默认 1000
+ * - [concurrency] 并发数 默认 1
+ * - [size] 测速大小(单位 MB). 默认 10
+ * - [keep_incompatible] 保留当前客户端不兼容的协议. 默认不保留.
+ * - [cache] 使用缓存, 默认不使用缓存
+ */
+
 async function operator(proxies = [], targetPlatform, context) {
   const cacheEnabled = $arguments.cache
   const cache = scriptResourceCache
@@ -149,15 +175,16 @@ async function operator(proxies = [], targetPlatform, context) {
       const status = parseInt(res.status || res.statusCode || 200)
       let latency = ''
       latency = `${Date.now() - startedAt}`
-      let speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8);
-      let speed = speedValue.padStart(3, '0') + ' M';
-      $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`)
+      const speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8);
+      const speed = speedValue.toString().padStart(3, '0') + ' M';
+      $.info([${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed});
       // 判断响应
-      if (speed) {
+      if (speedValue > 0) { // 注意这里比较的是speedValue而不是speed字符串
         validProxies.push({
-          ...proxy,
-          name: `[${speed}] ${proxy.name}`,
-        })
+        ...proxy,
+        name: [${speed}] ${proxy.name},
+        });
+      }
         if (cacheEnabled) {
           $.info(`[${proxy.name}] 设置成功缓存`)
           cache.set(id, { speed })
