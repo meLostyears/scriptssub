@@ -175,8 +175,8 @@ async function operator(proxies = [], targetPlatform, context) {
       const status = parseInt(res.status || res.statusCode || 200)
       let latency = ''
       latency = `${Date.now() - startedAt}`
-      const speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8)
-      const speed = speedValue.toString().padStart(3, '0') + ' M';
+      let speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8)
+      let speed = speedValue.toString().padStart(3, '0') + ' M';
       $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`)
       // 判断响应
       if (speedValue) {
