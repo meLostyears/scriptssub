@@ -175,14 +175,14 @@ async function operator(proxies = [], targetPlatform, context) {
       const status = parseInt(res.status || res.statusCode || 200)
       let latency = ''
       latency = `${Date.now() - startedAt}`
-      const speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8);
+      const speedValue = Math.round((bytes / 1024 / 1024 / (latency / 1000)) * 8)
       const speed = speedValue.toString().padStart(3, '0') + ' M';
-      $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`);
+      $.info(`[${proxy.name}] status: ${status}, latency: ${latency}, speed: ${speed}`)
       // 判断响应
-      if (speedValue > 0) { // 注意这里比较的是speedValue而不是speed字符串
+      if (speedValue) {
         validProxies.push({
-        ...proxy,
-        name: `[${speed}] ${proxy.name}`,
+          ...proxy,
+          name: `[${speed}] ${proxy.name}`,
         })
         if (cacheEnabled) {
           $.info(`[${proxy.name}] 设置成功缓存`)
